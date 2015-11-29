@@ -7,8 +7,9 @@ import akka.http.scaladsl.model._
 import StatusCodes._
 import org.joda.time.DateTime
 import akka.http.scaladsl.unmarshalling.Unmarshaller
+import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 
-trait VDMRouting {
+trait VDMRouting extends PlayJsonSupport {
 
   implicit val dateTimeStringUnmarshaller: Unmarshaller[String, DateTime] =
   Unmarshaller.strict[String, DateTime] { string ⇒
@@ -36,12 +37,12 @@ trait VDMRouting {
   def postRoute(postService: PostService) = pathPrefix("api" / "posts") {
     pathEnd {
       filters { filters =>
-        complete(postService.filterBy(filters).toString)
+        complete(postService.filterBy(filters))
       }
     } ~
     path(LongNumber) { id =>
       complete { postService.findPostById(id) match {
-          case Some(post) => post.toString
+          case Some(post) => PostResponse(post)
           case None => NotFound
         }
       }

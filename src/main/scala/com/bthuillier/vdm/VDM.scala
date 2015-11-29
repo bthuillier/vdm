@@ -9,7 +9,7 @@ object VDM extends App with VDMRouting {
   implicit val system = ActorSystem("vdm-system")
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
-  val posts = PostLoader.load("posts.csv")
+  val posts = PostLoader.load("posts.base")
   val service = new ConcretePostService(posts)
 
   val route = postRoute(service)

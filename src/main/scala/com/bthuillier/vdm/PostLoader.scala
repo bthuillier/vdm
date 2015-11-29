@@ -13,24 +13,20 @@ import java.io.File
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.json.Json
 
 object PostLoader {
 
-  def parseString(str: String): Option[VDMPost] = str.split(",").toList match {
-    case id :: content :: author :: date :: Nil =>
-      Try(
-        VDMPost(id.toLong, content, author, PostService.dateTimeFormatter.parseDateTime(date))
-      ).toOption
-    case _ =>
-      None
+  def parseString(str: String): Option[VDMPost] = {
+    Json.parse(str).validate[VDMPost].asOpt
   }
 
   def load(file: String)(implicit system: ActorSystem, materializer: ActorMaterializer): List[VDMPost] = {
     import akka.stream.io.Implicits._ // add file sources to Source object or use explicitly: SynchronousFileSource(f)
     val r = Source.synchronousFile(new File(s"target/$file")).
-      via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = 512, allowTruncation = true)).
+      via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = 1024, allowTruncation = true)).
       map(_.utf8String).
-      map(parseString(_)).runWith(Sink.head).map(_.toList)
+      map(parseString(_)).runWith(Sink.fold(List.empty[Option[VDMPost]])((x, y) => y :: x)).map(_.flatten)
     Await.result(r, 100 seconds)
 
 

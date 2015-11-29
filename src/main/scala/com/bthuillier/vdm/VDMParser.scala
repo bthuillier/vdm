@@ -14,6 +14,8 @@ import org.joda.time.{ DateTime => JDateTime}
 import scala.concurrent.Future
 import java.io.File
 import akka.util.ByteString
+import play.api.libs.json.Json
+
 
 object VDMParser extends App {
   implicit val system = ActorSystem("vdm-client-system")
@@ -51,7 +53,7 @@ object VDMParser extends App {
     }
 
     Future.sequence(queries).map(_.flatten).
-      map(posts => posts.map(p => s"${p.id},${p.content},${p.author},${p.date.toString(PostService.dateTimeFormatter)}\n"))
+      map(posts => posts.map(p => Json.stringify(Json.toJson(p)) + "\n"))
 
   }
 
@@ -59,9 +61,9 @@ object VDMParser extends App {
 
   import akka.stream.io.Implicits._
   import akka.stream.scaladsl._
-  val source = Source(result).map(x => ByteString(x.mkString))
+  val source = Source(result).map(x => ByteString(x.mkString, "UTF-8"))
 
-  source.runWith(Sink.synchronousFile(new File("target/posts.csv")))
+  source.runWith(Sink.synchronousFile(new File("target/posts.base")))
 
 
 }
