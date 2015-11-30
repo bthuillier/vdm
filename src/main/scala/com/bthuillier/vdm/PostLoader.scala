@@ -17,12 +17,15 @@ import play.api.libs.json.Json
 
 object PostLoader {
 
-  def parseString(str: String): Option[VDMPost] = {
+  def parseString(str: String): Option[VDMPost] =
     Json.parse(str).validate[VDMPost].asOpt
-  }
 
+  /**
+   * Load the file where the VDM post are saved
+   * and return all the posts save
+  **/
   def load(file: String)(implicit system: ActorSystem, materializer: ActorMaterializer): List[VDMPost] = {
-    import akka.stream.io.Implicits._ // add file sources to Source object or use explicitly: SynchronousFileSource(f)
+    import akka.stream.io.Implicits._
     val r = Source.synchronousFile(new File(s"target/$file")).
       via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = 1024, allowTruncation = true)).
       map(_.utf8String).

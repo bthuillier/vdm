@@ -16,21 +16,24 @@ trait VDMRouting extends PlayJsonSupport {
     try DateTime.parse(string)
     catch {
       case t: Throwable ⇒
-        throw if (string.isEmpty) Unmarshaller.NoContentException else new IllegalArgumentException(s"'$string' is not a valid DateTime value", t)
+        throw if (string.isEmpty)
+          Unmarshaller.NoContentException
+        else
+          new IllegalArgumentException(s"'$string' is not a valid DateTime value", t)
     }
   }
 
-  def filterAuthor: Directive1[Option[VDMPost => Boolean]] = parameter('author.?) map {
+  def authorFilterDirective: Directive1[Option[VDMPost => Boolean]] = parameter('author.?) map {
     author => author.map(PostService.authorFilter)
   }
 
-  def filterFromTo: Directive1[Option[VDMPost => Boolean]] = (parameter('from.as[DateTime].?) & parameter('to.as[DateTime].?)).tflatMap {
+  def fromToFilterDirective: Directive1[Option[VDMPost => Boolean]] = (parameter('from.as[DateTime].?) & parameter('to.as[DateTime].?)).tflatMap {
     case (Some(from), Some(to)) => provide(Some(PostService.dateFilter(from, to)))
     case (None, None) => provide(None)
     case _ => reject
   }
 
-  def filters = (filterAuthor & filterFromTo).tmap {
+  def filters = (authorFilterDirective & fromToFilterDirective).tmap {
     case (a, ft) => List(a, ft).flatten
   }
 

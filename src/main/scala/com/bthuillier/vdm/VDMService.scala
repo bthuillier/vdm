@@ -25,10 +25,6 @@ object VDMPost {
   implicit val vDMPostFormat: Format[VDMPost] = Json.format[VDMPost]
 
   val jsonDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
-
-
-
-  //implicit val dateFormat: Format[DateTime] =
 }
 
 case class Posts(count: Long, posts: List[VDMPost])
@@ -63,7 +59,7 @@ object PostService {
     post => post.author == author
 
   def dateFilter(from: DateTime, to: DateTime): VDMPost => Boolean =
-    post => post.date.isAfter(from)  && post.date.isBefore(to)
+    post => post.date.isAfter(from) && post.date.isBefore(to)
 
   def composeFilter(filters: List[VDMPost => Boolean]): VDMPost => Boolean =
     post => filters.foldLeft(emptyFilter(post))(_ && _(post))

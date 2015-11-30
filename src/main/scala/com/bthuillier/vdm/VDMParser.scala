@@ -63,7 +63,6 @@ object VDMParser extends App {
   import akka.stream.scaladsl._
   val source = Source(result).map(x => ByteString(x.mkString, "UTF-8"))
 
-  source.runWith(Sink.synchronousFile(new File("target/posts.base")))
-
+  source.runWith(Sink.synchronousFile(new File("target/posts.base"))).onComplete(_ ⇒ system.shutdown())
 
 }

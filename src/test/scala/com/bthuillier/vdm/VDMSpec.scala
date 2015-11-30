@@ -6,15 +6,19 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.server._
 import Directives._
 import org.joda.time.DateTime
+import play.api.libs.json._
+import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 
-class VDMSpec extends WordSpec with Matchers with ScalatestRouteTest {
+class VDMSpec extends WordSpec with Matchers with ScalatestRouteTest with PlayJsonSupport {
+
+  val post1 = VDMPost(1, "test", "author1", new DateTime(2015, 1, 1, 0, 0, 1))
 
   val fakePostService =
     new ConcretePostService(List(
-      VDMPost(1, "test", "test", new DateTime),
-      VDMPost(2, "test", "test", new DateTime),
-      VDMPost(3, "test", "test", new DateTime),
-      VDMPost(4, "test", "test", new DateTime)))
+      post1,
+      VDMPost(2, "test", "author2", new DateTime(2015, 2, 1, 0, 0, 0)),
+      VDMPost(3, "test", "author3", new DateTime(2015, 2, 1, 0, 0, 0)),
+      VDMPost(4, "test", "author3", new DateTime(2015, 3, 1, 0, 0, 0))))
 
   val route = new VDMRouting {}.postRoute(fakePostService)
 
@@ -25,20 +29,23 @@ class VDMSpec extends WordSpec with Matchers with ScalatestRouteTest {
       // tests:
       Get("/api/posts") ~> route ~> check {
         status shouldEqual StatusCodes.OK
+        responseAs[Posts].count shouldEqual 4
       }
     }
 
-    "return the list of posts filtered by author when calling '/api/posts?author=test'" in {
+    "return the list of posts filtered by author when calling '/api/posts?author=author2'" in {
       // tests:
-      Get("/api/posts?author=test") ~> route ~> check {
+      Get("/api/posts?author=author2") ~> route ~> check {
         status shouldEqual StatusCodes.OK
+        responseAs[Posts].count shouldEqual 1
       }
     }
 
     "return the list of posts filtered by date" in {
       // tests:
-      Get("/api/posts?from=2014-01-01&to=2014-01-01") ~> route ~> check {
+      Get("/api/posts?from=2015-01-01&to=2015-01-02") ~> route ~> check {
         status shouldEqual StatusCodes.OK
+        responseAs[Posts].count shouldEqual 1
       }
     }
 
@@ -57,6 +64,7 @@ class VDMSpec extends WordSpec with Matchers with ScalatestRouteTest {
       // tests:
       Get("/api/posts/1") ~> route ~> check {
         status shouldEqual StatusCodes.OK
+        responseAs[PostResponse].post shouldEqual post1
       }
     }
 
