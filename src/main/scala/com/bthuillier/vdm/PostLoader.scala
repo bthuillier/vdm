@@ -30,6 +30,7 @@ object PostLoader {
       via(Framing.delimiter(ByteString(System.lineSeparator), maximumFrameLength = 1024, allowTruncation = true)).
       map(_.utf8String).
       map(parseString(_)).runWith(Sink.fold(List.empty[Option[VDMPost]])((x, y) => y :: x)).map(_.flatten)
+
     Await.result(r, 100 seconds)
 
 
