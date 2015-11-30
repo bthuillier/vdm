@@ -48,7 +48,6 @@ object VDMParser extends App {
         r.entity.toStrict(100 seconds).map { entity =>
           parseDocument(Jsoup.parse(entity.data.decodeString("utf-8")))
         }
-
       }
     }
 
