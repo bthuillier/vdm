@@ -1,10 +1,6 @@
 package com.bthuillier.vdm
 
 import org.scalatest.{ Matchers, WordSpec }
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.http.scaladsl.server._
-import Directives._
 import org.jsoup.Jsoup
 
 class VDMParserSpec extends WordSpec with Matchers with VDMHtml {

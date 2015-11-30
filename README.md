@@ -9,5 +9,6 @@ Having SBT installed: [Installation](http://www.scala-sbt.org/release/tutorial/S
 The default clock is the system clock. It can be changed to a specific
 date before launching the BidEngine server:
 
-1. run the vdm parser `sbt 'runMain com.bthuillier.vdm.VDMParser'`
-2. run the server `sbt 'runMain com.bthuillier.vdm.VDM'`
+1. launching test `sbt test`
+2. run the vdm parser `sbt 'runMain com.bthuillier.vdm.VDMParser'`
+3. run the server `sbt 'runMain com.bthuillier.vdm.VDM'`
